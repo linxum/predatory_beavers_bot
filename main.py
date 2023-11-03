@@ -1,5 +1,6 @@
 import telebot
 from telebot import types
+from subscribe import subscribe
 
 token = "6578454575:AAE9ZgatzU730m4vslDHJqgQu8ayAYsHkDo"
 channel_id = ""
@@ -9,7 +10,8 @@ bot = telebot.TeleBot(token)
 
 @bot.message_handler(commands=['start'])
 def com_start(message):
-    bot.reply_to(message, "Добро пожаловать в бот!")
+    bot.reply_to(message, "Добро пожаловать в бот!", reply_markup=keys_menu)
+    subscribe(message.chat.id)
 
 
 def send_message_on_subscribe(bot, channel_id, user_id):
