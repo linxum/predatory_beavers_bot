@@ -9,16 +9,17 @@ bot = telebot.TeleBot(token)
 keys_menu = types.ReplyKeyboardMarkup(True, True)
 keys_menu.add("Расписание", "Состав", "Написать напутствие")
 
-key_subscribe = types.ReplyKeyboardMarkup(True, True)
-key_subscribe.add("Проверить подписку")
-
 
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.reply_to(message, "Добро пожаловать в бот!")
     if is_subscribed(channel_id, message.from_user.id):
+        key_subscribe = types.ReplyKeyboardMarkup(True, True)
+        key_subscribe.add("Проверить подписку")
+
         get_link = types.InlineKeyboardMarkup()
         get_link.add(types.InlineKeyboardButton(text="PREDATORY BEAVERS", url="https://t.me/predatorybeaver"))
+
         bot.send_message(message.chat.id, "Ссылка на канал", reply_markup=get_link)
         bot.send_message(message.chat.id, "Для работы с ботом вам необходимо подписаться на наш канал!",
                          reply_markup=key_subscribe)
@@ -37,8 +38,12 @@ def is_subscribed(channel_id, user_id):
 def keys(message):
     if message.text == "Проверить подписку":
         if is_subscribed(channel_id, message.from_user.id):
+            key_subscribe = types.ReplyKeyboardMarkup(True, True)
+            key_subscribe.add("Проверить подписку")
+
             get_link = types.InlineKeyboardMarkup()
             get_link.add(types.InlineKeyboardButton(text="PREDATORY BEAVERS", url="https://t.me/predatorybeaver"))
+
             bot.send_message(message.chat.id, "Ссылка на канал", reply_markup=get_link)
             bot.send_message(message.chat.id, "Для работы с ботом вам необходимо подписаться на наш канал!", reply_markup=key_subscribe)
 
