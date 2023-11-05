@@ -1,25 +1,46 @@
 import telebot
 from telebot import types
-from subscribe import subscribe
+import mailing
 
 token = "6578454575:AAE9ZgatzU730m4vslDHJqgQu8ayAYsHkDo"
-channel_id = ""
+channel_id = "@predatorybeaver"
 
 bot = telebot.TeleBot(token)
 keys_menu = types.ReplyKeyboardMarkup(True, True)
 keys_menu.add("Расписание", "Состав", "Написать напутствие")
 
+key_subscribe = types.ReplyKeyboardMarkup(True, True)
+key_subscribe.add("Проверить подписку")
+
 
 @bot.message_handler(commands=['start'])
-def com_start(message):
-    bot.reply_to(message, "Добро пожаловать в бот!", reply_markup=keys_menu)
-    subscribe(message.chat.id)
+def start(message):
+    bot.reply_to(message, "Добро пожаловать в бот!")
+    if is_subscribed(channel_id, message.from_user.id):
+        get_link = types.InlineKeyboardMarkup()
+        get_link.add(types.InlineKeyboardButton(text="PREDATORY BEAVERS", url="https://t.me/predatorybeaver"))
+        bot.send_message(message.chat.id, "Ссылка на канал", reply_markup=get_link)
+        bot.send_message(message.chat.id, "Для работы с ботом вам необходимо подписаться на наш канал!",
+                         reply_markup=key_subscribe)
 
 
-# def send_message_on_subscribe(bot, channel_id, user_id):
-#     if bot.get_chat_member(channel_id, user_id).status == "member":
-#         bot.send_message(user_id, "Привет! Так как ты подписался на наш канал, то мы подумали, что ты бы хотел "
-#                                   "попользоваться нашим ботом")
+def is_subscribed(channel_id, user_id):
+    try:
+        bot.get_chat_member(channel_id, user_id)
+        return True
+    except telebot.apihelper.ApiTelegramException as e:
+        if e.result_json['description'] == 'Bad Request: user not found':
+            return False
+
+
+@bot.message_handler(content_types=['text'])
+def keys(message):
+    if message.text == "Проверить подписку":
+        if is_subscribed(channel_id, message.from_user.id):
+            get_link = types.InlineKeyboardMarkup()
+            get_link.add(types.InlineKeyboardButton(text="PREDATORY BEAVERS", url="https://t.me/predatorybeaver"))
+            bot.send_message(message.chat.id, "Ссылка на канал", reply_markup=get_link)
+            bot.send_message(message.chat.id, "Для работы с ботом вам необходимо подписаться на наш канал!", reply_markup=key_subscribe)
 
 
 bot.polling()
