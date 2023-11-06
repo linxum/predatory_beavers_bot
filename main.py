@@ -1,6 +1,7 @@
 import telebot
 from telebot import types
 import mailing
+import csv
 
 token = "6578454575:AAE9ZgatzU730m4vslDHJqgQu8ayAYsHkDo"
 bot = telebot.TeleBot(token)
@@ -42,15 +43,25 @@ def keys(message):
         case "Состав":
             keys_games = types.InlineKeyboardMarkup()
             keys_games.add(types.InlineKeyboardButton(text="CS2", callback_data='cs2'))
-            keys_games.add(types.InlineKeyboardButton(text="Dota 2", callback_data='dota'))
+            keys_games.add(types.InlineKeyboardButton(text="Dota 2", callback_data='dota2'))
             bot.send_message(message.chat.id, "Выбери команду: ", reply_markup=keys_games)
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
     match call.data:
         case 'cs2':
-            bot.send_message(call.message.chat.id, "CS2")
-        case 'dota':
-            bot.send_message(call.message.chat.id, "Dota")
+            with open("players.csv", newline='', encoding="utf-8") as file:
+                reader = csv.reader(file, delimiter=',')
+                for row in reader:
+                    if row[0] == 'cs2':
+                        bot.send_message(call.message.chat.id, row[1])
+        case 'dota2':
+            with open("players.csv", newline='', encoding="utf-8") as file:
+                reader = csv.reader(file, delimiter=',')
+                for row in reader:
+                    if row[0] == 'dota2':
+                        bot.send_message(call.message.chat.id, row[1])
+
 
 bot.polling()
