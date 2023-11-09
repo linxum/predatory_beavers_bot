@@ -37,11 +37,19 @@ def get_post_video(domain):
     post = get_post(domain)['attachments']
     for attachment in post:
         if attachment['type'] == 'video':
-            urls.append("https://vk.com/video?z=video" + str(i['video']['owner_id']) + '_' + str(i['video']['id']))
+            urls.append("https://vk.com/video?z=video" + str(attachment['video']['owner_id']) + '_' + str(attachment['video']['id']))
     return urls
 
 
-def url_to_png(url):
-    f = open('out.png', 'wb')
-    f.write(u.request.urlopen(url).read())
-    f.close
+def url_to_png(urls):
+    names = []
+    count_url = 1
+    for url in urls:
+        name = str(count_url) + ".png"
+        f = open(name, 'w+b')
+        f.write(u.request.urlopen(url).read())
+        f.close
+        names.append(name)
+        count_url += 1
+    return names
+
