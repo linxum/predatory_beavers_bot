@@ -1,5 +1,6 @@
 import requests
 import urllib as u
+import os
 
 token = 'ccd39cf5ccd39cf5ccd39cf53ecfc5a0d8cccd3ccd39cf5a9984d97bd8f92cf358bbd91'
 ver = 5.126
@@ -53,3 +54,7 @@ def url_to_png(urls):
         count_url += 1
     return names
 
+
+def delete_files(pngs):
+    for png in pngs:
+        os.remove(png)
