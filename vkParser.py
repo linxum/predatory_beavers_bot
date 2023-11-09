@@ -22,7 +22,11 @@ def get_post(domain):
 
 
 def get_post_text(domain):
-    return get_post(domain)['text']
+    post = get_post(domain)['text']
+    post = post[post.find("|") + 1 : ]
+    post = post.replace("]", "", 1)
+    return post
+
 
 def get_post_photos(domain):
     urls = []
