@@ -2,6 +2,7 @@ import telebot
 from telebot import types
 import mailing
 import csv
+import vkParser
 
 token = "6578454575:AAE9ZgatzU730m4vslDHJqgQu8ayAYsHkDo"
 bot = telebot.TeleBot(token)
@@ -24,6 +25,22 @@ def start(message):
     else:
         bot.send_message(message.chat.id, "Добро пожаловать в бот!", reply_markup=keys_menu)
         mailing.subscribe(message.chat.id)
+
+
+@bot.message_handler(commands=['post'])
+def newPost(message):
+    if message.chat.id == 330804499:
+        post_text = vkParser.get_post_text("gorbenkogovorit")
+        if post_text != "":
+            bot.send_message(message.chat.id, post_text)
+        urls = vkParser.get_post_photos("gorbenkogovorit")
+        pngs = []
+        for url in urls:
+            pngs.append(vkParser.url_to_png(url))
+        for png in pngs:
+            photo = open('out.png', 'rb')
+            bot.send_photo(message.chat.id, photo)
+            photo.close()
 
 
 def is_subscribed(chat_id, user_id):
