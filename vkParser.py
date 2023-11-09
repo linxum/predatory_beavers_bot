@@ -27,7 +27,7 @@ def get_post_photos(domain):
     urls = []
     post = get_post(domain)['attachments']
     for attachment in post:
-        if attachment['type'] == photo:
+        if attachment['type'] == 'photo':
             urls.append(attachment['photo']['sizes'][-1]['url'])
     return urls
 
