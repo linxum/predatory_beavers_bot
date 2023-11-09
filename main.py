@@ -30,18 +30,30 @@ def start(message):
 
 @bot.message_handler(commands=['post'])
 def newPost(message):
-    if message.chat.id == 330804499:
-        post_text = vkParser.get_post_text("gorbenkogovorit")
-        if post_text != "":
-            bot.send_message(message.chat.id, post_text)
-        urls = vkParser.get_post_photos("gorbenkogovorit")
-        pngs = []
-        for url in urls:
-            pngs.append(vkParser.url_to_png(url))
+    domain = "beavers_esports"
+
+    # текст
+    post_text = vkParser.get_post_text(domain)
+    if post_text != "":
+        bot.send_message(message.chat.id, post_text)
+
+    # фото
+    urls_photo = vkParser.get_post_photos(domain)
+    pngs = vkParser.url_to_png(urls_photo)
+    if len(urls_photo) == 1:
         for png in pngs:
-            photo = open('out.png', 'rb')
+            photo = open(png, 'rb')
             bot.send_photo(message.chat.id, photo)
             photo.close()
+    elif len(urls_photo) > 1:
+        bot.send_media_group(message.chat.id, [types.InputMediaPhoto(open(png, "rb")) for png in pngs])
+    vkParser.delete_files(pngs)
+
+    # видео
+    urls_video = vkParser.get_post_video(domain)
+    if len(urls_video) > 0:
+        for url in urls_video:
+            bot.send_message(message.chat.id, url)
 
 
 def is_subscribed(chat_id, user_id):
