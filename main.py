@@ -6,14 +6,15 @@ import vkParser
 
 token = "6578454575:AAE9ZgatzU730m4vslDHJqgQu8ayAYsHkDo"
 bot = telebot.TeleBot(token)
+channel_id = "@predatorybeaver"
 
 keys_menu = types.ReplyKeyboardMarkup(True, True)
-keys_menu.add("Расписание", "Состав", "Написать напутствие")
+keys_menu.add("Расписание", "Состав", "Напутствие")
 
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    if not is_subscribed("@predatorybeaver", message.from_user.id):
+    if not is_subscribed(channel_id, message.from_user.id):
         key_subscribe = types.ReplyKeyboardMarkup(True, True)
         key_subscribe.add("Проверить подписку")
 
