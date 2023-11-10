@@ -36,7 +36,8 @@ def get_post_photos(domain):
     for attachment in post:
         if attachment['type'] == 'photo':
             urls.append(attachment['photo']['sizes'][-1]['url'])
-    return urls
+    pngs = url_to_png(urls)
+    return pngs
 
 
 def get_post_video(domain):
