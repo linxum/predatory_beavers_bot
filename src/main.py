@@ -1,4 +1,5 @@
 import csv
+import os
 
 import telebot
 from telebot import types
@@ -81,13 +82,13 @@ def keys(message):
 def callback_worker(call):
     match call.data:
         case 'cs2':
-            with open("players.csv", newline='', encoding="utf-8") as file:
+            with open("resources\players.csv", newline='', encoding="utf-8") as file:
                 reader = csv.reader(file, delimiter=',')
                 for row in reader:
                     if row[0] == 'cs2':
                         bot.send_message(call.message.chat.id, row[1])
         case 'dota2':
-            with open("players.csv", newline='', encoding="utf-8") as file:
+            with open("resources\players.csv", newline='', encoding="utf-8") as file:
                 reader = csv.reader(file, delimiter=',')
                 for row in reader:
                     if row[0] == 'dota2':
