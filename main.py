@@ -11,7 +11,7 @@ bot = telebot.TeleBot(tokens.tg_token())
 channel_id = "@predatorybeaver"
 
 keys_menu = types.ReplyKeyboardMarkup(True, True)
-keys_menu.add("Расписание", "Состав", "Напутствие")
+keys_menu.add("Расписание", "Состав", "Напутствие", "Оставить заявку")
 
 
 @bot.message_handler(commands=['start'])
