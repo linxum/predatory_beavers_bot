@@ -13,7 +13,7 @@ offset = 0
 def get_post(domain):
     response = requests.get('https://api.vk.com/method/wall.get',
                             params={
-                                'access_token': token,
+                                'access_token': tokens.vk_token(),
                                 'v': ver,
                                 'domain': domain,
                                 'offset': offset,
