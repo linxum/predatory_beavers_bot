@@ -1,8 +1,10 @@
-import requests
-import urllib as u
 import os
+import urllib as u
 
-token = 'ccd39cf5ccd39cf5ccd39cf53ecfc5a0d8cccd3ccd39cf5a9984d97bd8f92cf358bbd91'
+import requests
+
+import tokens
+
 ver = 5.126
 count = 1
 offset = 0
