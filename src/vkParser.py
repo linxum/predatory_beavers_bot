@@ -51,14 +51,12 @@ def get_post_video(domain):
 
 def url_to_png(urls):
     names = []
-    count_url = 1
     for url in urls:
-        name = str(count_url) + ".png"
+        name = "img/" + str(urls.index(url)) + ".png"
         f = open(name, 'w+b')
         f.write(u.request.urlopen(url).read())
         f.close
         names.append(name)
-        count_url += 1
     return names
 
 
