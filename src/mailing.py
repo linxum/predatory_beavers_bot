@@ -1,6 +1,6 @@
 def subscribe(id):
     flag = False
-    with open('id.txt', 'r+') as f:
+    with open('resources/id.txt', 'r+') as f:
         for line in f:
             if line == str(id) + '\n':
                 flag = True
@@ -10,9 +10,9 @@ def subscribe(id):
 
 
 def unsubscribe(id):
-    with open("id.txt", "r") as f:
+    with open("resources/id.txt", "r") as f:
         lines = f.readlines()
-    with open("id.txt", "w") as f:
+    with open("resources/id.txt", "w") as f:
         for line in lines:
             if line.strip("\n") != str(id):
                 f.write(line)
