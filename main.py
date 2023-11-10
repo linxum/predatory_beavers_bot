@@ -40,14 +40,12 @@ def newPost(message):
         bot.send_message(message.chat.id, post_text)
 
     # фото
-    urls_photo = vkParser.get_post_photos(domain)
-    pngs = vkParser.url_to_png(urls_photo)
-    if len(urls_photo) == 1:
-        for png in pngs:
-            photo = open(png, 'rb')
-            bot.send_photo(message.chat.id, photo)
-            photo.close()
-    elif len(urls_photo) > 1:
+    pngs = vkParser.get_post_photos(domain)
+    if len(pngs) == 1:
+        photo = open(pngs[0], 'rb')
+        bot.send_photo(message.chat.id, photo)
+        photo.close()
+    elif len(pngs) > 1:
         bot.send_media_group(message.chat.id, [types.InputMediaPhoto(open(png, "rb")) for png in pngs])
     vkParser.delete_files(pngs)
 
