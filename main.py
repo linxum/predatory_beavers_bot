@@ -7,8 +7,7 @@ import mailing
 import tokens
 import vkParser
 
-token = "6578454575:AAE9ZgatzU730m4vslDHJqgQu8ayAYsHkDo"
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot(tokens.tg_token())
 channel_id = "@predatorybeaver"
 
 keys_menu = types.ReplyKeyboardMarkup(True, True)
