@@ -12,5 +12,3 @@ def get(bot, message):
                                                                                                         enemy=row['enemy'],
                                                                                                         game=row['game'])
             bot.send_message(message.chat.id, msg)
-
-def get_time_game():
