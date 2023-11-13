@@ -3,6 +3,7 @@ import csv
 import telebot
 from telebot import types
 import schedule
+import time
 from multiprocessing.context import Process
 
 import mailing
@@ -109,7 +110,7 @@ def callback_worker(call):
                         bot.send_message(call.message.chat.id, row[1])
 
 
-schedule.every().day.at("06:00").do(mail)
+# schedule.every().day.at("06:00").do(mail)
 
 
 class ScheduleMessage():
