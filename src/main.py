@@ -10,6 +10,7 @@ import mailing
 import tokens
 import vkParser
 import schedule_games
+import players
 
 bot = telebot.TeleBot(tokens.tg_token())
 channel_id = "@predatorybeaver"
@@ -90,24 +91,27 @@ def keys(message):
             keys_games.add(types.InlineKeyboardButton(text="Dota 2", callback_data='dota2'))
             bot.send_message(message.chat.id, "Выбери команду: ", reply_markup=keys_games)
         case "Расписание":
-            schedule.get(bot, message)
+            schedule_games.get(bot, message)
+        case "Изменить состав":
+            game = bot.send_message(message.chat.id, "game")
+            bot.register_next_step_handler(game, name)
+
+
+def name(message):
+    name = bot.send_message(message.chat.id, "name")
+    bot.register_next_step_handler(name, put, message.text)
+
+
+def put(message, game):
+    player = {'game': game, 'last_name': message.text}
+    players.new_player(player)
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
-    match call.data:
-        case 'cs2':
-            with open("resources\players.csv", newline='', encoding="utf-8") as file:
-                reader = csv.reader(file, delimiter=',')
-                for row in reader:
-                    if row[0] == 'cs2':
-                        bot.send_message(call.message.chat.id, row[1])
-        case 'dota2':
-            with open("resources\players.csv", newline='', encoding="utf-8") as file:
-                reader = csv.reader(file, delimiter=',')
-                for row in reader:
-                    if row[0] == 'dota2':
-                        bot.send_message(call.message.chat.id, row[1])
+    gamers = players.get(call.data)
+    for gamer in gamers:
+        bot.send_message(call.message.chat.id, gamer)
 
 
 # schedule.every().day.at("06:00").do(mail)
