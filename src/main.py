@@ -44,19 +44,14 @@ def start(message):
 def newPost(message):
     domain = "beavers_esports"
 
-    # текст
     post_text = vkParser.get_post_text(domain)
-    if post_text != "":
-        bot.send_message(message.chat.id, post_text)
-
-    # фото
     pngs = vkParser.get_post_photos(domain)
     if len(pngs) == 1:
         photo = open(pngs[0], 'rb')
-        bot.send_photo(message.chat.id, photo)
+        bot.send_photo(message.chat.id, photo, caption=post_text)
         photo.close()
     elif len(pngs) > 1:
-        bot.send_media_group(message.chat.id, [types.InputMediaPhoto(open(png, "rb")) for png in pngs])
+        bot.send_media_group(message.chat.id, [types.InputMediaPhoto(open(png, "rb"), caption=post_text) for png in pngs])
     vkParser.delete_files(pngs)
 
     # видео
