@@ -87,31 +87,16 @@ def keys(message):
             bot.send_message(message.chat.id, "Выбери команду: ", reply_markup=keys_games)
         case "Расписание":
             schedule_games.get(bot, message)
+        case "Напутствие":
+            print(0)
+        case "Оставить заявку":
+            print(0)
         case "Изменить состав":
             if is_admin(channel_id, message.from_user.id):
-                game = bot.send_message(message.chat.id, "game")
-                bot.register_next_step_handler(game, fname)
+                players.games(message, bot)
         case "Отправить пост":
-            temp.newPost(message)
-
-
-def fname(message):
-    name = bot.send_message(message.chat.id, "first_name")
-    bot.register_next_step_handler(name, lname, message.text)
-
-
-def lname(message, game):
-    name = bot.send_message(message.chat.id, "last_name")
-    bot.register_next_step_handler(name, url, game, message.text)
-
-
-def url(message, game, fname):
-    ur = bot.send_message(message.chat.id, "url")
-    bot.register_next_step_handler(ur, add_new, game, fname, message.text)
-
-def add_new(message, game, fname, lname):
-    player = {'game': game, 'first_name': fname, 'last_name': lname, 'url': message.text}
-    players.new_player(player)
+            if is_admin(channel_id, message.from_user.id):
+                newPost(message)
 
 
 @bot.callback_query_handler(func=lambda call: True)
