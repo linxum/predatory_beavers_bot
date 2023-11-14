@@ -19,7 +19,7 @@ keys_menu = types.ReplyKeyboardMarkup(True, True)
 keys_menu.add("Расписание", "Состав", "Напутствие", "Оставить заявку")
 
 keys_admin = types.ReplyKeyboardMarkup(True, True)
-keys_admin.add("Получить заявки", "Добавить матч", "Пожелания", "Изменить состав", "Добавить матч")
+keys_admin.add("Получить заявки", "Добавить матч", "Пожелания", "Изменить состав", "Отправить пост")
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -93,25 +93,52 @@ def keys(message):
         case "Расписание":
             schedule_games.get(bot, message)
         case "Изменить состав":
-            game = bot.send_message(message.chat.id, "game")
-            bot.register_next_step_handler(game, name)
+            if is_admin(channel_id, message.from_user.id):
+                game = bot.send_message(message.chat.id, "game")
+                bot.register_next_step_handler(game, fname)
+        case "Отправить пост":
+            temp.newPost(message)
 
 
-def name(message):
-    name = bot.send_message(message.chat.id, "name")
-    bot.register_next_step_handler(name, put, message.text)
+def fname(message):
+    name = bot.send_message(message.chat.id, "first_name")
+    bot.register_next_step_handler(name, lname, message.text)
 
 
-def put(message, game):
-    player = {'game': game, 'last_name': message.text}
+def lname(message, game):
+    name = bot.send_message(message.chat.id, "last_name")
+    bot.register_next_step_handler(name, url, game, message.text)
+
+
+def url(message, game, fname):
+    ur = bot.send_message(message.chat.id, "url")
+    bot.register_next_step_handler(ur, add_new, game, fname, message.text)
+
+def add_new(message, game, fname, lname):
+    player = {'game': game, 'first_name': fname, 'last_name': lname, 'url': message.text}
     players.new_player(player)
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
     gamers = players.get(call.data)
+    # TODO: строка вывода
     for gamer in gamers:
         bot.send_message(call.message.chat.id, gamer)
+
+
+def is_subscribed(chat_id, user_id):
+    try:
+        bot.get_chat_member(chat_id, user_id)
+        return True
+    except telebot.apihelper.ApiTelegramException as e:
+        if e.result_json['description'] == 'Bad Request: user not found':
+            return False
+
+
+def is_admin(chat_id, user_id):
+    chat_member = bot.get_chat_member(channel_id, user_id)
+    return chat_member.status in ['creator', 'administrator']
 
 
 # schedule.every().day.at("06:00").do(mail)
