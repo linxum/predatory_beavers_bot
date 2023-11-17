@@ -93,11 +93,20 @@ def keys(message):
             print(0)
         case "Изменить состав":
             if is_admin(channel_id, message.from_user.id):
-                players.games(message, bot)
+                keys_player = types.ReplyKeyboardMarkup(True, True)
+                keys_player.add("Добавить игрока", "Удалить игрока")
+                bot.send_message(message.chat.id, "Выбери", reply_markup=keys_player)
         case "Отправить пост":
             if is_admin(channel_id, message.from_user.id):
                 newPost(message)
-
+        case "Добавить игрока":
+            if is_admin(channel_id, message.from_user.id):
+                result = players.add_game(message, bot)
+        case "Удалить игрока":
+            print(0)
+        case "Добавить матч":
+            if is_admin(channel_id, message.from_user.id):
+                schedule_games.add_enemy(message, bot)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
