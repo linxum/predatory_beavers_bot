@@ -101,12 +101,19 @@ def keys(message):
                 newPost(message)
         case "Добавить игрока":
             if is_admin(channel_id, message.from_user.id):
-                result = players.add_game(message, bot)
+                players.add(message, bot)
         case "Удалить игрока":
-            print(0)
+            if is_admin(channel_id, message.from_user.id):
+                remove_player(message)
         case "Добавить матч":
             if is_admin(channel_id, message.from_user.id):
                 schedule_games.add_enemy(message, bot)
+
+
+def remove_player(message):
+    nick = bot.send_message(message.chat.id, "nick")
+    bot.register_next_step_handler(nick, players.remove, bot)
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
