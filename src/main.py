@@ -11,6 +11,7 @@ import tokens
 import vkParser
 import schedule_games
 import players
+import resume
 
 bot = telebot.TeleBot(tokens.tg_token())
 channel_id = "@predatorybeaver"
@@ -19,7 +20,7 @@ keys_menu = types.ReplyKeyboardMarkup(True, True)
 keys_menu.add("Расписание", "Состав", "Напутствие", "Оставить заявку")
 
 keys_admin = types.ReplyKeyboardMarkup(True, True)
-keys_admin.add("Получить заявки", "Добавить матч", "Пожелания", "Изменить состав", "Отправить пост")
+keys_admin.add("Получить заявки", "Изменить расписание", "Пожелания", "Изменить состав", "Отправить пост")
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -86,28 +87,41 @@ def keys(message):
             keys_games.add(types.InlineKeyboardButton(text="Dota 2", callback_data='dota2'))
             bot.send_message(message.chat.id, "Выбери команду: ", reply_markup=keys_games)
         case "Расписание":
-            schedule_games.get(bot, message)
+            schedule_games.get_message(bot, message)
         case "Напутствие":
             print(0)
         case "Оставить заявку":
             print(0)
+
+
         case "Изменить состав":
             if is_admin(channel_id, message.from_user.id):
                 keys_player = types.ReplyKeyboardMarkup(True, True)
                 keys_player.add("Добавить игрока", "Удалить игрока")
                 bot.send_message(message.chat.id, "Выбери", reply_markup=keys_player)
-        case "Отправить пост":
-            if is_admin(channel_id, message.from_user.id):
-                newPost(message)
         case "Добавить игрока":
             if is_admin(channel_id, message.from_user.id):
                 players.add(message, bot)
         case "Удалить игрока":
             if is_admin(channel_id, message.from_user.id):
                 remove_player(message)
+        case "Изменить расписание":
+            if is_admin(channel_id, message.from_user.id):
+                keys_games = types.ReplyKeyboardMarkup(True, True)
+                keys_games.add("Добавить матч", "Удалить матч")
+                bot.send_message(message.chat.id, "Выбери", reply_markup=keys_games)
         case "Добавить матч":
             if is_admin(channel_id, message.from_user.id):
                 schedule_games.add_enemy(message, bot)
+        case "Удалить матч":
+            if is_admin(channel_id, message.from_user.id):
+                remove_games(message)
+        case "Отправить пост":
+            if is_admin(channel_id, message.from_user.id):
+                newPost(message)
+        case "Получить заявки":
+            resume.get(message, bot)
+
 
 
 def remove_player(message):
@@ -115,12 +129,25 @@ def remove_player(message):
     bot.register_next_step_handler(nick, players.remove, bot)
 
 
+def remove_games(message):
+    enemy = bot.send_message(message.chat.id, "enemy")
+    bot.register_next_step_handler(enemy, day)
+
+def day(message):
+    day = bot.send_message(message.chat.id, "day")
+    bot.register_next_step_handler(day, schedule_games.remove, bot, message.text)
+
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
-    gamers = players.get(call.data)
-    # TODO: строка вывода
-    for gamer in gamers:
-        bot.send_message(call.message.chat.id, gamer)
+    if call.data == "resume_yes":
+        resume.check(resume.get_name(call.message.text))
+    elif call.data == "resume_no":
+        resume.remove(resume.get_name(call.message.text))
+    else:
+        gamers = players.get(call.data)
+        # TODO: строка вывода
+        for gamer in gamers:
+            bot.send_message(call.message.chat.id, gamer)
 
 
 def is_subscribed(chat_id, user_id):
@@ -137,7 +164,7 @@ def is_admin(chat_id, user_id):
     return chat_member.status in ['creator', 'administrator']
 
 
-# schedule.every().day.at("06:00").do(mail)
+schedule.every().day.at("18:28").do(mailing.morning_notification, bot)
 
 
 class ScheduleMessage():
