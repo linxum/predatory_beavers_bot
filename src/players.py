@@ -55,11 +55,9 @@ def remove(message, bot):
         reader = csv.reader(infile)
         writer = csv.writer(outfile)
 
-        # Пропускаем заголовок
         header = next(reader)
         writer.writerow(header)
 
-        # Удаляем строки, где значение 3-го столбца равно "nick"
         for row in reader:
             if row[2] != message.text:
                 writer.writerow(row)
