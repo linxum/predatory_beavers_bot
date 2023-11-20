@@ -1,6 +1,12 @@
 import csv
+import datetime
+import os
 
-def get(bot, message):
+
+def update_date():
+    return datetime.datetime.now()
+
+def get_message(bot, message):
     with open("resources/games.csv", "r") as fileR:
         reader = csv.DictReader(fileR)
         for row in reader:
@@ -11,6 +17,16 @@ def get(bot, message):
                                                                                                         enemy=row['enemy'],
                                                                                                         game=row['game'])
             bot.send_message(message.chat.id, msg)
+
+def get_info():
+    with open("resources/games.csv", "r") as fileR:
+        reader = csv.DictReader(fileR)
+        day = update_date().day
+        month = update_date().month
+        year = update_date().year
+        for row in reader:
+            if int(row['day']) == day and int(row['month']) == month and int(row['year']) == year:
+                return {'hour': row['hour'], 'minute': row['minute'], 'enemy': row['enemy'], 'game': row['game']}
 
 
 def add_enemy(message, bot):
@@ -66,3 +82,36 @@ def add(message, bot, enemy, day, month, year, game, hour, minute):
         writer.writerow(game)
     bot.send_message(message.chat.id, "Успешно")
     file.close()
+
+def auto_remove():
+    with open('resources/games.csv', 'r') as infile, open('resources/games_edit.csv', 'w+', newline='') as outfile:
+        reader = csv.reader(infile)
+        writer = csv.writer(outfile)
+
+        # Пропускаем заголовок
+        header = next(reader)
+        writer.writerow(header)
+        day = update_date().day
+        month = update_date().month
+        year = update_date().year
+        # Удаляем строки, где значение 3-го столбца равно "nick"
+        for row in reader:
+            if int(row[2]) != day or int(row[3]) != month or int(row[4]) != year:
+                writer.writerow(row)
+
+    os.replace('resources/games_edit.csv', 'resources/games.csv')
+
+def remove(message, bot, enemy):
+    with open('resources/games.csv', 'r') as infile, open('resources/games_edit.csv', 'w+', newline='') as outfile:
+        reader = csv.reader(infile)
+        writer = csv.writer(outfile)
+
+        header = next(reader)
+        writer.writerow(header)
+
+        for row in reader:
+            if row[1] != enemy and row[2] != message.text:
+                writer.writerow(row)
+
+    os.replace('resources/games_edit.csv', 'resources/games.csv')
+    bot.send_message(message.chat.id, "Успешно")
