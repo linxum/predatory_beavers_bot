@@ -1,4 +1,5 @@
 import csv
+
 import schedule_games
 
 def subscribe(id):
@@ -13,11 +14,11 @@ def subscribe(id):
 
 
 def morning_notification(bot):
-    if len(schedule_games.get_info()) > 0:
-        game = schedule_games.get_info()
-        msg = "Сегодня в {hour}:{minute} состоится матч в игре {game} с командой {enemy}".format(hour=game['hour'],
+    if len(schedule_games.get_today_info()) > 0:
+        for game in schedule_games.get_today_info():
+            msg = "Сегодня в {hour}:{minute} состоится матч в игре {game} с командой {enemy}".format(hour=game['hour'],
                                                                                                  minute=game['minute'],
                                                                                                  game=game['game'],
                                                                                                  enemy=game['enemy'])
-        for id in open('resources/ids.txt', 'r').readlines():
-            bot.send_message(id, msg)
+            for id in open('resources/ids.txt', 'r').readlines():
+                bot.send_message(id, msg)
