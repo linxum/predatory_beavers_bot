@@ -22,6 +22,8 @@ keys_menu.add("Расписание", "Состав", "Напутствие", "�
 keys_admin = types.ReplyKeyboardMarkup(True, True)
 keys_admin.add("Получить заявки", "Изменить расписание", "Пожелания", "Изменить состав", "Отправить пост")
 
+# hours_to_games = []
+
 @bot.message_handler(commands=['start'])
 def start(message):
     if not is_admin(channel_id, message.from_user.id):
@@ -89,10 +91,9 @@ def keys(message):
         case "Расписание":
             schedule_games.get_message(bot, message)
         case "Напутствие":
-            print(0)
+            print(schedule_games.get_hours())
         case "Оставить заявку":
-            print(0)
-
+            resume.add_resume(message, bot)
 
         case "Изменить состав":
             if is_admin(channel_id, message.from_user.id):
@@ -102,9 +103,11 @@ def keys(message):
         case "Добавить игрока":
             if is_admin(channel_id, message.from_user.id):
                 players.add(message, bot)
+                bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
         case "Удалить игрока":
             if is_admin(channel_id, message.from_user.id):
-                remove_player(message)
+                players.remove_player(message)
+                bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
         case "Изменить расписание":
             if is_admin(channel_id, message.from_user.id):
                 keys_games = types.ReplyKeyboardMarkup(True, True)
@@ -113,9 +116,11 @@ def keys(message):
         case "Добавить матч":
             if is_admin(channel_id, message.from_user.id):
                 schedule_games.add_enemy(message, bot)
+                bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
         case "Удалить матч":
             if is_admin(channel_id, message.from_user.id):
-                remove_games(message)
+                schedule_games.remove_games(message)
+                bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
         case "Отправить пост":
             if is_admin(channel_id, message.from_user.id):
                 newPost(message)
@@ -123,19 +128,15 @@ def keys(message):
             resume.get(message, bot)
 
 
-
-def remove_player(message):
-    nick = bot.send_message(message.chat.id, "nick")
-    bot.register_next_step_handler(nick, players.remove, bot)
-
-
 def remove_games(message):
     enemy = bot.send_message(message.chat.id, "enemy")
     bot.register_next_step_handler(enemy, day)
 
+
 def day(message):
     day = bot.send_message(message.chat.id, "day")
     bot.register_next_step_handler(day, schedule_games.remove, bot, message.text)
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
@@ -164,7 +165,9 @@ def is_admin(chat_id, user_id):
     return chat_member.status in ['creator', 'administrator']
 
 
-schedule.every().day.at("18:28").do(mailing.morning_notification, bot)
+schedule.every().day.at("20:44:30").do(mailing.morning_notification, bot)
+# for hour in hours_to_games:
+#     schedule.every().day.at(hour.strftime('%H:%M')).do(mailing.morning_notification, bot)
 
 
 class ScheduleMessage():
@@ -172,6 +175,7 @@ class ScheduleMessage():
   def try_send_schedule():
     while True:
       schedule.run_pending()
+      # hours_to_games = schedule_games.get_hours()
       time.sleep(1)
 
   def start_process():
@@ -186,12 +190,5 @@ if __name__ == '__main__':
         bot.polling(none_stop=True)
     except:
         pass
-
-# TODO: сделать два разных main для user и admin
-
-# TODO: возможность оставить заявку на вступление в команду (либо просто написать сообщение и чтобы оно отправилось
-#  администраторам, либо прям заполнение анкеты как в дайвинчике, там узнать дисциплину, ранг, опыт, пару слов о себе)
-#
+# bot.polling()
 # TODO: возможность писать в боте напутствия для игроков, чтобы бот пересылал это сообщение в беседу с игроками
-#
-# TODO: парсинг счета матча с фейсита(ну это в самую последнюю очередь, вдруг получится)
