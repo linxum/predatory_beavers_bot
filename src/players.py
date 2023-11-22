@@ -1,7 +1,6 @@
 import csv
 import os
 
-
 def get(game):
     players = []
     with open("resources/players.csv", "r") as file:
@@ -11,10 +10,6 @@ def get(game):
             if row[0] == game:
                 players.append(row[1])
     return players
-
-
-
-
 
 
 def add(message, bot):
@@ -47,11 +42,16 @@ def add_player(message, bot, game, f_name, nick, l_name):
     with open("resources/players.csv", "a", newline='\n', encoding='utf-8') as file:
         writer = csv.DictWriter(file, ['game', 'first_name', 'nick', 'last_name', 'url'])
         writer.writerow(player)
-    bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
+
+
+
+def remove_player(message):
+    nick = bot.send_message(message.chat.id, "nick")
+    bot.register_next_step_handler(nick, players.remove, bot)
 
 
 def remove(message, bot):
-    with open('resources/players.csv', 'r') as infile, open('resources/players_edit.csv', 'w+', newline='') as outfile:
+    with open('resources/players.csv', 'r') as infile, open('resources/players_edit.csv', 'w+', newline='', encoding='utf-8') as outfile:
         reader = csv.reader(infile)
         writer = csv.writer(outfile)
 
@@ -63,4 +63,3 @@ def remove(message, bot):
                 writer.writerow(row)
 
     os.replace('resources/players_edit.csv', 'resources/players.csv')
-    bot.send_message(message.chat.id, "Успешно")
