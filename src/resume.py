@@ -15,7 +15,7 @@ def get_name(text):
 
 def get(message, bot):
     count = 0
-    with open('resources/resume.csv', "r") as file:
+    with open('resources/resume.csv', "r", encoding="utf-8") as file:
         reader = csv.DictReader(file)
         for row in reader:
             count += 1
@@ -32,7 +32,7 @@ def get(message, bot):
 
 
 def check(name):
-    with open("resources/resume.csv", "r") as fileR, open("resources/resume_edit.csv", "w", newline='\n') as fileW:
+    with open("resources/resume.csv", "r", encoding='utf-8') as fileR, open("resources/resume_edit.csv", "w", newline='\n', encoding='utf-8') as fileW:
         reader = csv.reader(fileR)
         writer = csv.writer(fileW)
         writer.writerow(next(reader))
@@ -46,8 +46,30 @@ def check(name):
     os.replace("resources/resume_edit.csv", "resources/resume.csv")
 
 
+def add_resume(message, bot):
+    name = bot.send_message(message.chat.id, "Имя?")
+    bot.register_next_step_handler(name, add_game, bot)
+
+
+def add_game(message, bot):
+    game = bot.send_message(message.chat.id, "Игра?")
+    bot.register_next_step_handler(game, add_why, bot, message.text)
+
+
+def add_why(message, bot, name):
+    why = bot.send_message(message.chat.id, "Почему?")
+    bot.register_next_step_handler(why, add, bot, name, message.text)
+
+def add(message, bot, name, game):
+    resume = {'name': name, 'game': game, 'why': message.text, 'checked': False}
+    with open("resources/resume.csv", "a", newline='\n', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, ['name', 'game', 'why', 'checked'])
+        writer.writerow(resume)
+    bot.send_message(message.chat.id, "Успешно")
+
+
 def remove(name):
-    with open('resources/resume.csv', 'r') as infile, open('resources/resume_edit.csv', 'w+', newline='') as outfile:
+    with open('resources/resume.csv', 'r', encoding='utf-8') as infile, open('resources/resume_edit.csv', 'w+', newline='', encoding='utf-8') as outfile:
         reader = csv.reader(infile)
         writer = csv.writer(outfile)
 
