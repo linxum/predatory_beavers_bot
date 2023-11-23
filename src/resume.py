@@ -43,8 +43,12 @@ def check(name):
             if row[0] != name:
                 writer.writerow(row)
             elif row[0] == name:
-                row[3] = True
+                row[5] = True
                 writer.writerow(row)
+                player = {'game': row[2], 'name': row[0], 'nick': row[1], 'url': row[4]}
+                with open("resources/players.csv", "a", newline='\n', encoding='utf-8') as file:
+                    writer2 = csv.DictWriter(file, ['game', 'name', 'nick', 'url'])
+                    writer2.writerow(player)
 
     os.replace("resources/resume_edit.csv", "resources/resume.csv")
 
