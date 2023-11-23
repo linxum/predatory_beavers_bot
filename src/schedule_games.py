@@ -99,8 +99,17 @@ def auto_remove():
     os.replace('resources/games_edit.csv', 'resources/games.csv')
 
 
+def remove_games(message, bot):
+    enemy = bot.send_message(message.chat.id, "enemy")
+    bot.register_next_step_handler(enemy, day, bot)
+
+def day(message, bot):
+    day = bot.send_message(message.chat.id, "day")
+    bot.register_next_step_handler(day, remove, bot, message.text)
+
+
 def remove(message, bot, enemy):
-    with open('resources/games.csv', 'r') as infile, open('resources/games_edit.csv', 'w+', newline='', encoding='utf-8') as outfile:
+    with open('resources/games.csv', 'r', encoding='utf-8') as infile, open('resources/games_edit.csv', 'w+', newline='', encoding='utf-8') as outfile:
         reader = csv.reader(infile)
         writer = csv.writer(outfile)
 
@@ -108,7 +117,8 @@ def remove(message, bot, enemy):
         writer.writerow(header)
 
         for row in reader:
-            if row[1] != enemy and row[2] != message.text:
+            date = datetime.datetime.strptime(row[3], "%Y-%m-%d %H:%M")
+            if row[1] != enemy and date.day != message.text:
                 writer.writerow(row)
 
     os.replace('resources/games_edit.csv', 'resources/games.csv')
