@@ -90,9 +90,10 @@ def keys(message):
         case "Проверить подписку":
             start(message)
         case "Состав":
+            games = players.get_games()
             keys_games = types.InlineKeyboardMarkup()
-            keys_games.add(types.InlineKeyboardButton(text="CS2", callback_data='cs2'))
-            keys_games.add(types.InlineKeyboardButton(text="Dota 2", callback_data='dota2'))
+            for game in games:
+                keys_games.add(types.InlineKeyboardButton(text=game, callback_data=game))
             bot.send_message(message.chat.id, "Выбери команду: ", reply_markup=keys_games)
         case "Расписание":
             schedule_games.get_message(bot, message)
@@ -109,11 +110,9 @@ def keys(message):
         case "Добавить игрока":
             if is_admin(channel_id, message.from_user.id):
                 players.add(message, bot)
-                bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
         case "Удалить игрока":
             if is_admin(channel_id, message.from_user.id):
-                players.remove_player(message)
-                bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
+                players.remove_player(message, bot)
         case "Изменить расписание":
             if is_admin(channel_id, message.from_user.id):
                 keys_games = types.ReplyKeyboardMarkup(True, True)
@@ -122,26 +121,18 @@ def keys(message):
         case "Добавить матч":
             if is_admin(channel_id, message.from_user.id):
                 schedule_games.add_enemy(message, bot)
-                bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
         case "Удалить матч":
             if is_admin(channel_id, message.from_user.id):
-                schedule_games.remove_games(message)
-                bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
+                schedule_games.remove_games(message, bot)
         case "Отправить пост":
             if is_admin(channel_id, message.from_user.id):
                 newPost(message)
         case "Получить заявки":
-            resume.get(message, bot)
-
-
-def remove_games(message):
-    enemy = bot.send_message(message.chat.id, "enemy")
-    bot.register_next_step_handler(enemy, day)
-
-
-def day(message):
-    day = bot.send_message(message.chat.id, "day")
-    bot.register_next_step_handler(day, schedule_games.remove, bot, message.text)
+            if is_admin(channel_id, message.from_user.id):
+                resume.get(message, bot)
+        case "Пожелания":
+            if is_admin(channel_id, message.from_user.id):
+                gift.get(message, bot)
 
 
 @bot.callback_query_handler(func=lambda call: True)
