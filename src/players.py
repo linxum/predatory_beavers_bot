@@ -5,11 +5,10 @@ from keyboard import keys_admin,keys_menu
 def get(game):
     players = []
     with open("resources/players.csv", "r") as file:
-        reader = csv.reader(file)
-        next(reader, None)
+        reader = csv.DictReader(file)
         for row in reader:
-            if row[0] == game:
-                players.append(row[1])
+            if row['game'] == game:
+                players.append(row)
     return players
 
 def get_games():
@@ -49,9 +48,9 @@ def add_player(message, bot, game, name, nick):
 
 
 
-def remove_player(message):
+def remove_player(message, bot):
     nick = bot.send_message(message.chat.id, "nick")
-    bot.register_next_step_handler(nick, players.remove, bot)
+    bot.register_next_step_handler(nick, remove, bot)
 
 
 def remove(message, bot):
