@@ -154,21 +154,7 @@ def callback_worker(call):
         gamers = players.get(call.data)
         # TODO: строка вывода
         for gamer in gamers:
-            bot.send_message(call.message.chat.id, gamer)
-
-
-def is_subscribed(chat_id, user_id):
-    try:
-        bot.get_chat_member(chat_id, user_id)
-        return True
-    except telebot.apihelper.ApiTelegramException as e:
-        if e.result_json['description'] == 'Bad Request: user not found':
-            return False
-
-
-def is_admin(chat_id, user_id):
-    chat_member = bot.get_chat_member(channel_id, user_id)
-    return chat_member.status in ['creator', 'administrator']
+            bot.send_message(call.message.chat.id, gamer['name'])
 
 
 schedule.every().day.at("20:44:30").do(mailing.morning_notification, bot)
