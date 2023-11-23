@@ -18,12 +18,6 @@ from keyboard import keys_admin,keys_menu
 bot = telebot.TeleBot(tokens.tg_token())
 channel_id = "@predatorybeaver"
 
-keys_menu = types.ReplyKeyboardMarkup(True, True)
-keys_menu.add("Расписание", "Состав", "Напутствие", "Оставить заявку")
-
-keys_admin = types.ReplyKeyboardMarkup(True, True)
-keys_admin.add("Получить заявки", "Изменить расписание", "Пожелания", "Изменить состав", "Отправить пост")
-
 # hours_to_games = []
 
 @bot.message_handler(commands=['start'])
