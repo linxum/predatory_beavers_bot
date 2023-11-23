@@ -19,17 +19,19 @@ def get(message, bot):
     with open('resources/resume.csv', "r", encoding="utf-8") as file:
         reader = csv.DictReader(file)
         for row in reader:
-            count += 1
             if row["checked"] == "False":
-                msg = "Имя: {name}\nИгра: {game}\nПочему?: {why}".format(name=row["name"],
-                                                                         game=row["game"],
-                                                                         why=row["why"])
+                count += 1
+                msg = "Имя: {name}\nНик: {nick}\nИгра: {game}\nПочему?: {why}\nURL: {url}".format(name=row["name"],
+                                                                                                  nick=row['nick'],
+                                                                                                  game=row["game"],
+                                                                                                  why=row["why"],
+                                                                                                  url=row['url'])
                 key_resume = types.InlineKeyboardMarkup()
                 key_resume.add(types.InlineKeyboardButton(text="Y", callback_data="resume_yes"))
                 key_resume.add(types.InlineKeyboardButton(text="N", callback_data="resume_no"))
                 bot.send_message(message.chat.id, msg, reply_markup=key_resume)
-    if count == 0:
-        bot.send_message(message.chat.id, "Новых заявок нет")
+        if count == 0:
+            bot.send_message(message.chat.id, "Новых заявок нет")
 
 
 def check(name):
