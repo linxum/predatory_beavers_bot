@@ -98,7 +98,8 @@ def keys(message):
         case "Расписание":
             schedule_games.get_message(bot, message)
         case "Напутствие":
-            print(schedule_games.get_hours())
+            msg = bot.send_message(message.chat.id, "cjjff")
+            bot.register_next_step_handler(msg, gift.add)
         case "Оставить заявку":
             resume.add_resume(message, bot)
 
@@ -139,8 +140,16 @@ def keys(message):
 def callback_worker(call):
     if call.data == "resume_yes":
         resume.check(resume.get_name(call.message.text))
+        bot.edit_message_text("Успешно", chat_id=call.message.chat.id, message_id=call.message.message_id)
     elif call.data == "resume_no":
         resume.remove(resume.get_name(call.message.text))
+        bot.edit_message_text("Успешно", chat_id=call.message.chat.id, message_id=call.message.message_id)
+    elif call.data == "gift_yes":
+        gift.reply_to(call.message, bot)
+        bot.edit_message_text("Успешно", chat_id=call.message.chat.id, message_id=call.message.message_id)
+    elif call.data == "gift_no":
+        gift.remove(call.message)
+        bot.edit_message_text("Успешно", chat_id=call.message.chat.id, message_id=call.message.message_id)
     else:
         gamers = players.get(call.data)
         # TODO: строка вывода
