@@ -55,24 +55,35 @@ def check(name):
 
 def add_resume(message, bot):
     name = bot.send_message(message.chat.id, "Имя?")
-    bot.register_next_step_handler(name, add_game, bot)
+    bot.register_next_step_handler(name, add_nick, bot)
 
 
-def add_game(message, bot):
+def add_nick(message, bot):
+    nick = bot.send_message(message.chat.id, "Ник?")
+    bot.register_next_step_handler(nick, add_game, bot, message.text)
+
+
+def add_game(message, bot, name):
     game = bot.send_message(message.chat.id, "Игра?")
-    bot.register_next_step_handler(game, add_why, bot, message.text)
+    bot.register_next_step_handler(game, add_why, bot, name, message.text)
 
 
-def add_why(message, bot, name):
+def add_why(message, bot, name, nick):
     why = bot.send_message(message.chat.id, "Почему?")
-    bot.register_next_step_handler(why, add, bot, name, message.text)
+    bot.register_next_step_handler(why, add_url, bot, name, nick, message.text)
 
-def add(message, bot, name, game):
-    resume = {'name': name, 'game': game, 'why': message.text, 'checked': False}
+
+def add_url(message, bot, name, nick, game):
+    url = bot.send_message(message.chat.id, "Ссылочку?")
+    bot.register_next_step_handler(url, add, bot, name, nick, game, message.text)
+
+
+def add(message, bot, name, nick, game, why):
+    resume = {'name': name, 'nick': nick, 'game': game, 'why': why, 'url': message.text, 'checked': False}
     with open("resources/resume.csv", "a", newline='\n', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, ['name', 'game', 'why', 'checked'])
+        writer = csv.DictWriter(file, ['name', 'nick', 'game', 'why', 'url', 'checked'])
         writer.writerow(resume)
-    bot.send_message(message.chat.id, "Успешно")
+    bot.send_message(message.chat.id, "Успешно", reply_markup=keys_menu)
 
 
 def remove(name):
