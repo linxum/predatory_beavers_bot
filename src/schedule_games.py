@@ -2,6 +2,7 @@ import csv
 import datetime
 import os
 import locale
+from keyboard import keys_admin,keys_menu
 
 locale.setlocale(locale.LC_ALL, "ru")
 

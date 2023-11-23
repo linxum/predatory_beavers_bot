@@ -1,5 +1,6 @@
 import csv
 import os
+from keyboard import keys_admin,keys_menu
 
 def get(game):
     players = []

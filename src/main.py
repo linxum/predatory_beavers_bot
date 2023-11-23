@@ -12,6 +12,8 @@ import vkParser
 import schedule_games
 import players
 import resume
+import gift
+from keyboard import keys_admin,keys_menu
 
 bot = telebot.TeleBot(tokens.tg_token())
 channel_id = "@predatorybeaver"
