@@ -59,6 +59,17 @@ def newPost(message):
             bot.send_message(message.chat.id, url)
 
 
+@bot.message_handler(commands=['admin'])
+def set_admin(message):
+    if is_admin(channel_id, message.from_user.id):
+        bot.send_message(message.chat.id, "Привет, админ!", reply_markup=keys_admin)
+
+@bot.message_handler(commands=['user'])
+def set_user(message):
+    if is_admin(channel_id, message.from_user.id):
+        bot.send_message(message.chat.id, "Привет, юзер!", reply_markup=keys_menu)
+
+
 def is_subscribed(chat_id, user_id):
     try:
         bot.get_chat_member(chat_id, user_id)
