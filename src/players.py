@@ -45,6 +45,7 @@ def add_player(message, bot, game, name, nick):
     with open("resources/players.csv", "a", newline='\n', encoding='utf-8') as file:
         writer = csv.DictWriter(file, ['game', 'name', 'nick', 'url'])
         writer.writerow(player)
+    bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
 
 
 
@@ -66,3 +67,4 @@ def remove(message, bot):
                 writer.writerow(row)
 
     os.replace('resources/players_edit.csv', 'resources/players.csv')
+    bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
