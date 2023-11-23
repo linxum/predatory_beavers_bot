@@ -39,7 +39,6 @@ def start(message):
         bot.send_message(message.chat.id, "Привет, админ", reply_markup=keys_admin)
 
 
-@bot.message_handler(commands=['post'])
 def newPost(message):
     domain = "beavers_esports"
 
