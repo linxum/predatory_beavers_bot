@@ -12,6 +12,14 @@ def get(game):
                 players.append(row[1])
     return players
 
+def get_games():
+    games = []
+    with open("resources/players.csv", "r", encoding="utf-8") as fileR:
+        reader = csv.DictReader(fileR)
+        for row in reader:
+            if not row['game'] in games:
+                games.append(row['game'])
+    return games
 
 def add(message, bot):
     game = bot.send_message(message.chat.id, "game")
