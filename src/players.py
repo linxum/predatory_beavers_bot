@@ -4,7 +4,7 @@ from keyboard import keys_admin,keys_menu
 
 def get(game):
     players = []
-    with open("resources/players.csv", "r") as file:
+    with open("resources/players.csv", "r", encoding="utf-8") as file:
         reader = csv.DictReader(file)
         for row in reader:
             if row['game'] == game:
@@ -27,35 +27,30 @@ def add(message, bot):
 
 def add_name(message, bot):
     name = bot.send_message(message.chat.id, "first_name")
-    bot.register_next_step_handler(name, add_nick, bot, message.text)
+    bot.register_next_step_handler(name, add_url, bot, message.text)
 
 
-def add_nick(message, bot, game):
-    nick = bot.send_message(message.chat.id, "nick")
-    bot.register_next_step_handler(nick, add_url, bot, game, message.text)
-
-
-def add_url(message, bot, game, name):
+def add_url(message, bot, game):
     url = bot.send_message(message.chat.id, "url")
-    bot.register_next_step_handler(url, add_player, bot, game, name, message.text)
+    bot.register_next_step_handler(url, add_player, bot, game, message.text)
 
 
-def add_player(message, bot, game, name, nick):
-    player = {'game': game, 'name': name, 'nick': nick, 'url': message.text}
+def add_player(message, bot, game, name):
+    player = {'game': game, 'name': name, 'url': message.text}
     with open("resources/players.csv", "a", newline='\n', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, ['game', 'name', 'nick', 'url'])
+        writer = csv.DictWriter(file, ['name', 'game', 'url'])
         writer.writerow(player)
     bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
 
 
 
 def remove_player(message, bot):
-    nick = bot.send_message(message.chat.id, "nick")
-    bot.register_next_step_handler(nick, remove, bot)
+    name = bot.send_message(message.chat.id, "name")
+    bot.register_next_step_handler(name, remove, bot)
 
 
 def remove(message, bot):
-    with open('resources/players.csv', 'r') as infile, open('resources/players_edit.csv', 'w+', newline='', encoding='utf-8') as outfile:
+    with open('resources/players.csv', 'r', encoding='utf-8') as infile, open('resources/players_edit.csv', 'w+', newline='', encoding='utf-8') as outfile:
         reader = csv.reader(infile)
         writer = csv.writer(outfile)
 
@@ -63,7 +58,7 @@ def remove(message, bot):
         writer.writerow(header)
 
         for row in reader:
-            if row[2] != message.text:
+            if row[0] != message.text:
                 writer.writerow(row)
 
     os.replace('resources/players_edit.csv', 'resources/players.csv')

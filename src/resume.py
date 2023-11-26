@@ -21,11 +21,10 @@ def get(message, bot):
         for row in reader:
             if row["checked"] == "False":
                 count += 1
-                msg = "Имя: {name}\nНик: {nick}\nИгра: {game}\nПочему?: {why}\nURL: {url}".format(name=row["name"],
-                                                                                                  nick=row['nick'],
-                                                                                                  game=row["game"],
-                                                                                                  why=row["why"],
-                                                                                                  url=row['url'])
+                msg = "Имя: {name}\nИгра: {game}\nПочему?: {why}\nURL: {url}".format(name=row["name"],
+                                                                                     game=row["game"],
+                                                                                     why=row["why"],
+                                                                                     url=row['url'])
                 key_resume = types.InlineKeyboardMarkup()
                 key_resume.add(types.InlineKeyboardButton(text="Y", callback_data="resume_yes"))
                 key_resume.add(types.InlineKeyboardButton(text="N", callback_data="resume_no"))
@@ -45,43 +44,34 @@ def check(name):
             elif row[0] == name:
                 row[5] = True
                 writer.writerow(row)
-                player = {'game': row[2], 'name': row[0], 'nick': row[1], 'url': row[4]}
-                with open("resources/players.csv", "a", newline='\n', encoding='utf-8') as file:
-                    writer2 = csv.DictWriter(file, ['game', 'name', 'nick', 'url'])
-                    writer2.writerow(player)
 
     os.replace("resources/resume_edit.csv", "resources/resume.csv")
 
 
 def add_resume(message, bot):
     name = bot.send_message(message.chat.id, "Имя?")
-    bot.register_next_step_handler(name, add_nick, bot)
+    bot.register_next_step_handler(name, add_game, bot)
 
 
-def add_nick(message, bot):
-    nick = bot.send_message(message.chat.id, "Ник?")
-    bot.register_next_step_handler(nick, add_game, bot, message.text)
-
-
-def add_game(message, bot, name):
+def add_game(message, bot):
     game = bot.send_message(message.chat.id, "Игра?")
-    bot.register_next_step_handler(game, add_why, bot, name, message.text)
+    bot.register_next_step_handler(game, add_why, bot, message.text)
 
 
-def add_why(message, bot, name, nick):
+def add_why(message, bot, name):
     why = bot.send_message(message.chat.id, "Почему?")
-    bot.register_next_step_handler(why, add_url, bot, name, nick, message.text)
+    bot.register_next_step_handler(why, add_url, bot, name, message.text)
 
 
-def add_url(message, bot, name, nick, game):
+def add_url(message, bot, name, game):
     url = bot.send_message(message.chat.id, "Ссылочку?")
-    bot.register_next_step_handler(url, add, bot, name, nick, game, message.text)
+    bot.register_next_step_handler(url, add, bot, name, game, message.text)
 
 
-def add(message, bot, name, nick, game, why):
-    resume = {'name': name, 'nick': nick, 'game': game, 'why': why, 'url': message.text, 'checked': False}
+def add(message, bot, name, game, why):
+    resume = {'name': name, 'game': game, 'why': why, 'url': message.text, 'checked': False}
     with open("resources/resume.csv", "a", newline='\n', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, ['name', 'nick', 'game', 'why', 'url', 'checked'])
+        writer = csv.DictWriter(file, ['name', 'game', 'why', 'url', 'checked'])
         writer.writerow(resume)
     bot.send_message(message.chat.id, "Успешно", reply_markup=keys_menu)
 
