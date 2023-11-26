@@ -154,9 +154,14 @@ def callback_worker(call):
         bot.edit_message_text("Успешно", chat_id=call.message.chat.id, message_id=call.message.message_id)
     else:
         gamers = players.get(call.data)
-        # TODO: строка вывода
+        msg = f"{call.data}\n"
         for gamer in gamers:
-            bot.send_message(call.message.chat.id, gamer['name'])
+            msg += f"Имя: {gamer['name']}\nСсылка: "
+            if gamer['url'] != "":
+                msg += f"{gamer['url']}\n"
+            else:
+                msg += "не найдена\n"
+        bot.send_message(call.message.chat.id, msg, disable_web_page_preview=True)
 
 
 schedule.every().day.at("20:44:30").do(mailing.morning_notification, bot)
@@ -169,7 +174,6 @@ class ScheduleMessage():
   def try_send_schedule():
     while True:
       schedule.run_pending()
-      # hours_to_games = schedule_games.get_hours()
       time.sleep(1)
 
   def start_process():
@@ -185,4 +189,3 @@ if __name__ == '__main__':
     except:
         pass
 # bot.polling()
-# TODO: возможность писать в боте напутствия для игроков, чтобы бот пересылал это сообщение в беседу с игроками
