@@ -1,3 +1,4 @@
-name,nick,game,why,url,checked
-Ivan,smhnv,cs2,idk,dfghj,False
-Ваня,smkhnv,майнкрафт,мне 9,нет,False
+name,game,why,url,checked
+Ivan,cs2,idk,dfghj,False
+Михаил,Вор в законе,Потому что епта,пошел нахуй,True
+Димок,нуждики онлайн\,потому,соси,False
