@@ -4,9 +4,13 @@ from keyboard import keys_admin,keys_menu
 
 path = "C:/Users/smehn/PycharmProjects/Predatory Beavers Bot/gifts"
 
-def add(message):
-    with open("gifts/{count}.txt".format(count=len(os.listdir(path)) + 1), 'w', encoding="utf-8") as fileW:
+
+def add(message, bot):
+    with open("gifts/{count}.txt".format(count=len(os.listdir(path)) + 1), 'w+', encoding="utf-8") as fileW:
+        print(f"Отправитель: {message.chat.first_name} {message.chat.last_name}", file=fileW)
         print(message.text, file=fileW)
+    bot.send_message(message.chat.id, "Успешно", reply_markup=keys_menu)
+
 
 def get(message, bot):
     for gift in os.listdir(path):
@@ -18,7 +22,7 @@ def get(message, bot):
 
 
 def reply_to(message, bot):
-    bot.send_message(message.chat.id, f"{message.text}\nОтправитель: {message.chat.first_name} {message.chat.last_name}")
+    bot.send_message(message.chat.id, f"{message.text}")
     remove(message)
 
 
