@@ -23,13 +23,17 @@ def update_date():
 
 
 def get_message(bot, message):
-    with open("resources/games.csv", "r") as fileR:
+    msg = ""
+    with open("resources/games.csv", "r", encoding="utf-8") as fileR:
         reader = csv.DictReader(fileR)
         for row in reader:
             time = datetime.datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M")
-            msg = time.strftime("%d %B в %H:%M") + " наша команда будет играть с {enemy} в {game}".format(enemy=row['enemy'],
-                                                                                                        game=row['game'])
-            bot.send_message(message.chat.id, msg)
+            msg += time.strftime("%d.%m в %H:%M") + f" с {row['enemy']} в {row['game']}\nСсылка: "
+            if row['url'] != "":
+                msg += f"{row['url']}\n"
+            else:
+                msg += "не найдена\n"
+    bot.send_message(message.chat.id, msg)
 
 
 def get_today_info():
