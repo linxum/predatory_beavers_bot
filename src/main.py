@@ -100,8 +100,8 @@ def keys(message):
         case "Расписание":
             schedule_games.get_message(bot, message)
         case "Напутствие":
-            msg = bot.send_message(message.chat.id, "cjjff")
-            bot.register_next_step_handler(msg, gift.add)
+            msg = bot.send_message(message.chat.id, "Напиши сообщение для нашей команды!")
+            bot.register_next_step_handler(msg, gift.add, bot)
         case "Оставить заявку":
             resume.add_resume(message, bot)
 
@@ -164,9 +164,8 @@ def callback_worker(call):
         bot.send_message(call.message.chat.id, msg, disable_web_page_preview=True)
 
 
-schedule.every().day.at("20:44:30").do(mailing.morning_notification, bot)
-# for hour in hours_to_games:
-#     schedule.every().day.at(hour.strftime('%H:%M')).do(mailing.morning_notification, bot)
+schedule.every().day.at("20:46:00").do(mailing.morning_notification, bot)
+schedule.every().day.at("00:00").do(schedule_games.auto_remove)
 
 
 class ScheduleMessage():
