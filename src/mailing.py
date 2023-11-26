@@ -2,6 +2,7 @@ import csv
 from keyboard import keys_admin,keys_menu
 import schedule_games
 
+
 def subscribe(id):
     flag = False
     with open('resources/ids.txt', 'r+') as f:
