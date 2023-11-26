@@ -18,7 +18,6 @@ from keyboard import keys_admin,keys_menu
 bot = telebot.TeleBot(tokens.tg_token())
 channel_id = "@predatorybeaver"
 
-# hours_to_games = []
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -72,8 +71,11 @@ def set_user(message):
 
 def is_subscribed(chat_id, user_id):
     try:
-        bot.get_chat_member(chat_id, user_id)
-        return True
+        member = bot.get_chat_member(chat_id, user_id)
+        if member.status == 'left':
+            return False
+        else:
+            return True
     except telebot.apihelper.ApiTelegramException as e:
         if e.result_json['description'] == 'Bad Request: user not found':
             return False
