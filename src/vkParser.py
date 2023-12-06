@@ -1,12 +1,12 @@
 import os
 import urllib as u
-
+import re
 import requests
 
 import tokens
 
 ver = 5.126
-count = 1
+count = 2
 offset = 0
 
 
@@ -20,14 +20,21 @@ def get_post(domain):
                                 'count': count
                             }
                             )
-    return response.json()['response']['items'][0]
+    if not 'is_pinned' in response.json()['response']['items'][0]:
+        return response.json()['response']['items'][0]
+    else:
+        return response.json()['response']['items'][1]
 
 
 def get_post_text(domain):
-    post = get_post(domain)['text']
-    post = post[post.find("|") + 1 : ]
-    post = post.replace("]", "", 1)
-    return post
+    text = get_post(domain)['text']
+    ids = re.finditer(r'\[id\d+\|([^\]]+)\]', text)
+    for id in ids:
+        text = text.replace(id.group(), id.group(1))
+    clubs = re.finditer(r'\[club\d+\|([^\]]+)\]', text)
+    for club in clubs:
+        text = text.replace(club.group(), club.group(1))
+    return text
 
 
 def get_post_photos(domain):
