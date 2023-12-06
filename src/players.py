@@ -1,6 +1,6 @@
 import csv
 import os
-from keyboard import keys_admin,keys_menu
+from keyboard import keys_admin, keys_menu, key_cancel
 
 def get(game):
     players = []
@@ -21,17 +21,17 @@ def get_games():
     return games
 
 def add(message, bot):
-    game = bot.send_message(message.chat.id, "game")
+    game = bot.send_message(message.chat.id, "Напиши дисциплину игрока", reply_markup=key_cancel)
     bot.register_next_step_handler(game, add_name, bot)
 
 
 def add_name(message, bot):
-    name = bot.send_message(message.chat.id, "first_name")
+    name = bot.send_message(message.chat.id, "Напиши ФИО игрока", reply_markup=key_cancel)
     bot.register_next_step_handler(name, add_url, bot, message.text)
 
 
 def add_url(message, bot, game):
-    url = bot.send_message(message.chat.id, "url")
+    url = bot.send_message(message.chat.id, "Напиши ссылку на соц. сеть", reply_markup=key_cancel)
     bot.register_next_step_handler(url, add_player, bot, game, message.text)
 
 
@@ -45,11 +45,12 @@ def add_player(message, bot, game, name):
 
 
 def remove_player(message, bot):
-    name = bot.send_message(message.chat.id, "name")
+    name = bot.send_message(message.chat.id, "Напиши ФИО игрока для удаления", reply_markup=key_cancel)
     bot.register_next_step_handler(name, remove, bot)
 
 
 def remove(message, bot):
+    check = False
     with open('resources/players.csv', 'r', encoding='utf-8') as infile, open('resources/players_edit.csv', 'w+', newline='', encoding='utf-8') as outfile:
         reader = csv.reader(infile)
         writer = csv.writer(outfile)
@@ -60,6 +61,11 @@ def remove(message, bot):
         for row in reader:
             if row[0] != message.text:
                 writer.writerow(row)
+            else:
+                check = True
 
     os.replace('resources/players_edit.csv', 'resources/players.csv')
-    bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
+    if check:
+        bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
+    else:
+        bot.send_message(message.chat.id, "Игрок не найден", reply_markup=keys_admin)
