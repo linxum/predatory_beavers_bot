@@ -4,6 +4,7 @@ import telebot
 from telebot import types
 import schedule
 import time
+import os
 from multiprocessing.context import Process
 
 import mailing
@@ -13,7 +14,7 @@ import schedule_games
 import players
 import resume
 import gift
-from keyboard import keys_admin,keys_menu
+from keyboard import keys_admin, keys_menu, key_cancel
 
 bot = telebot.TeleBot(tokens.tg_token())
 channel_id = "@predatorybeaver"
@@ -21,6 +22,7 @@ channel_id = "@predatorybeaver"
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    mailing.subscribe(message.chat.id)
     if not is_admin(channel_id, message.from_user.id):
         if not is_subscribed(channel_id, message.from_user.id):
             key_subscribe = types.ReplyKeyboardMarkup(True, True)
@@ -33,7 +35,6 @@ def start(message):
             bot.send_message(message.chat.id, "Для работы с ботом вам необходимо подписаться на наш канал!", reply_markup=key_subscribe)
         else:
             bot.send_message(message.chat.id, "Добро пожаловать в бот!", reply_markup=keys_menu)
-            mailing.subscribe(message.chat.id)
     else:
         bot.send_message(message.chat.id, "Привет, админ", reply_markup=keys_admin)
 
@@ -51,7 +52,6 @@ def newPost(message):
         bot.send_media_group(message.chat.id, [types.InputMediaPhoto(open(png, "rb"), caption=post_text) for png in pngs])
     vkParser.delete_files(pngs)
 
-    # видео
     urls_video = vkParser.get_post_video(domain)
     if len(urls_video) > 0:
         for url in urls_video:
@@ -68,6 +68,17 @@ def set_user(message):
     if is_admin(channel_id, message.from_user.id):
         bot.send_message(message.chat.id, "Привет, юзер!", reply_markup=keys_menu)
 
+@bot.message_handler(commands=['unsubscribe'])
+def admin_unsubscribe(message):
+    if is_admin(channel_id, message.from_user.id):
+        mailing.unsubscribe(message.chat.id, bot)
+
+def cancel(message):
+    bot.clear_step_handler_by_chat_id(message.chat.id)
+    if is_admin(channel_id, message.from_user.id):
+        bot.send_message(message.chat.id, "Отмена", reply_markup=keys_admin)
+    else:
+        bot.send_message(message.chat.id, "Отмена", reply_markup=keys_menu)
 
 def is_subscribed(chat_id, user_id):
     try:
@@ -91,24 +102,29 @@ def keys(message):
     match message.text:
         case "Проверить подписку":
             start(message)
-        case "Состав":
+        case "Наши составы👥":
             games = players.get_games()
             keys_games = types.InlineKeyboardMarkup()
             for game in games:
                 keys_games.add(types.InlineKeyboardButton(text=game, callback_data=game))
-            bot.send_message(message.chat.id, "Выбери команду: ", reply_markup=keys_games)
-        case "Расписание":
+            keys_games.add(types.InlineKeyboardButton(text="Назад", callback_data="cancel"))
+            bot.send_message(message.chat.id, "Какая дисциплина интересует?", reply_markup=keys_games)
+        case "Расписание матчей🗓":
             schedule_games.get_message(bot, message)
-        case "Напутствие":
-            msg = bot.send_message(message.chat.id, "Напиши сообщение для нашей команды!")
+        case "Сообщение игрокам💌":
+            msg = bot.send_message(message.chat.id, "🔥 Наш бот предоставляет возможность любому человеку оставить пару приятных, напутственных слов для игроков сборных\n\nНапиши их здесь!", reply_markup=key_cancel)
             bot.register_next_step_handler(msg, gift.add, bot)
-        case "Оставить заявку":
+        case "Вступить в ХБ🦫":
             resume.add_resume(message, bot)
+        case "О нас📌":
+            bot.send_message(message.chat.id, ".")
+        case "Назад":
+            cancel(message)
 
         case "Изменить состав":
             if is_admin(channel_id, message.from_user.id):
                 keys_player = types.ReplyKeyboardMarkup(True, True)
-                keys_player.add("Добавить игрока", "Удалить игрока")
+                keys_player.add("Добавить игрока", "Удалить игрока", "Назад")
                 bot.send_message(message.chat.id, "Выбери", reply_markup=keys_player)
         case "Добавить игрока":
             if is_admin(channel_id, message.from_user.id):
@@ -119,7 +135,7 @@ def keys(message):
         case "Изменить расписание":
             if is_admin(channel_id, message.from_user.id):
                 keys_games = types.ReplyKeyboardMarkup(True, True)
-                keys_games.add("Добавить матч", "Удалить матч")
+                keys_games.add("Добавить матч", "Удалить матч", "Назад")
                 bot.send_message(message.chat.id, "Выбери", reply_markup=keys_games)
         case "Добавить матч":
             if is_admin(channel_id, message.from_user.id):
@@ -140,8 +156,11 @@ def keys(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
-    if call.data == "resume_yes":
-        resume.check(resume.get_name(call.message.text))
+    if call.data == "cancel":
+        cancel(call.message)
+    elif call.data == "resume_yes":
+        bot.send_message(-1002120616869, call.message.text)
+        resume.remove(resume.get_name(call.message.text))
         bot.edit_message_text("Успешно", chat_id=call.message.chat.id, message_id=call.message.message_id)
     elif call.data == "resume_no":
         resume.remove(resume.get_name(call.message.text))
@@ -154,37 +173,45 @@ def callback_worker(call):
         bot.edit_message_text("Успешно", chat_id=call.message.chat.id, message_id=call.message.message_id)
     else:
         gamers = players.get(call.data)
-        msg = f"{call.data}\n"
+        msg = f"🔥 Хищные бобры в {call.data} представляют следующие игроки:\n\n"
         for gamer in gamers:
-            msg += f"Имя: {gamer['name']}\nСсылка: "
+            msg += f"- {gamer['name']}\nКонтакты: "
             if gamer['url'] != "":
-                msg += f"{gamer['url']}\n"
+                msg += f"{gamer['url']}\n\n"
             else:
-                msg += "не найдена\n"
-        bot.send_message(call.message.chat.id, msg, disable_web_page_preview=True)
+                msg += "отсутствуют\n\n"
+        if call.data in os.listdir("players_img/"):
+            bot.send_media_group(call.message.chat.id, [types.InputMediaPhoto(open(f"players_img/{call.data}/{file}", "rb"), caption = msg if file == '1.jpg' else '') for file in os.listdir(f"players_img/{call.data}")])
+        else:
+            bot.send_message(call.message.chat.id, msg, disable_web_page_preview=True)
 
 
-schedule.every().day.at("20:46:00").do(mailing.morning_notification, bot)
-schedule.every().day.at("00:00").do(schedule_games.auto_remove)
 
+# schedule.every().day.at("09:00").do(mailing.morning_notification, bot)
+# schedule.every().day.at("00:00").do(schedule_games.auto_remove)
+#
+#
+# class ScheduleMessage():
+#
+#   def try_send_schedule():
+#     while True:
+#       schedule.run_pending()
+#       time.sleep(1)
+#
+#   def start_process():
+#     p1 = Process(target=ScheduleMessage.try_send_schedule, args=())
+#     p1.start()
+#
+#
+# if __name__ == '__main__':
+#     ScheduleMessage.start_process()
+#     try:
+#         # keep_alive()
+#         bot.polling(none_stop=True)
+#     except:
+#         pass
+bot.polling()
 
-class ScheduleMessage():
+# TODO: добавить удаление [id...|]
 
-  def try_send_schedule():
-    while True:
-      schedule.run_pending()
-      time.sleep(1)
-
-  def start_process():
-    p1 = Process(target=ScheduleMessage.try_send_schedule, args=())
-    p1.start()
-
-
-if __name__ == '__main__':
-    ScheduleMessage.start_process()
-    try:
-        # keep_alive()
-        bot.polling(none_stop=True)
-    except:
-        pass
-# bot.polling()
+# TODO: залить на норм сервер
