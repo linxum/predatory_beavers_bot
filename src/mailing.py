@@ -23,3 +23,13 @@ def morning_notification(bot):
                                                                                                  enemy=game['enemy'])
             for id in open('resources/ids.txt', 'r').readlines():
                 bot.send_message(id, msg)
+
+
+def unsubscribe(id, bot):
+    with open("resources/ids.txt", "r") as fR:
+        lines = fR.readlines()
+    with open("resources/ids.txt", 'w') as fW:
+        for line in lines:
+            if line.strip('\n') != str(id):
+                fW.write(line)
+    bot.send_message(id, "Рассылка отключена. Для включения нужно использовать /start")
