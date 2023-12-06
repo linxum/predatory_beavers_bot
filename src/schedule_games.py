@@ -1,10 +1,8 @@
 import csv
 import datetime
 import os
-import locale
-from keyboard import keys_admin,keys_menu
 
-locale.setlocale(locale.LC_ALL, "ru")
+from keyboard import keys_admin, key_cancel
 
 
 def update_date():
@@ -21,18 +19,41 @@ def update_date():
 #                 hours.append(event - datetime.timedelta(hours=1))
 #     return hours
 
+def sort_csv(input_file = "resources/games.csv"):
+    # Чтение CSV-файла
+    with open(input_file, 'r', encoding='utf-8') as infile, open('resources/games_edit.csv', 'w+', newline='', encoding='utf-8') as outfile:
+        reader = csv.reader(infile)
+        header = next(reader)  # Сохранение заголовка
+
+        # Сортировка данных
+        sorted_data = sorted(reader, key=lambda x: x[2])
+
+    # Запись отсортированных данных в новый CSV-файл
+        writer = csv.writer(outfile)
+        writer.writerow(header)
+        writer.writerows(sorted_data)
+    os.replace('resources/games_edit.csv', 'resources/games.csv')
+
 
 def get_message(bot, message):
-    msg = ""
+    sort_csv()
+    msg = "🔥 Расписание ближайших игр!\n"
+    cur_game = ""
     with open("resources/games.csv", "r", encoding="utf-8") as fileR:
         reader = csv.DictReader(fileR)
         for row in reader:
-            time = datetime.datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M")
-            msg += time.strftime("%d.%m в %H:%M") + f" с {row['enemy']} в {row['game']}\nСсылка: "
-            if row['url'] != "":
-                msg += f"{row['url']}\n"
+            if row['game'] == cur_game:
+                time = datetime.datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M")
+                msg += "- " + time.strftime("%d.%m в %H:%M") + f" против {row['enemy']}\n"
+                if row['url'] != "-":
+                    msg += f"Ссылка: {row['url']}\n"
             else:
-                msg += "не найдена\n"
+                msg += f"\nВ дисциплине: {row['game']}\n"
+                cur_game = row['game']
+                time = datetime.datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M")
+                msg += "- " + time.strftime("%d.%m в %H:%M") + f" против {row['enemy']}\n"
+                if row['url'] != "-":
+                    msg += f"Ссылка: {row['url']}\n"
     bot.send_message(message.chat.id, msg)
 
 
@@ -48,22 +69,22 @@ def get_today_info():
 
 
 def add_enemy(message, bot):
-    enemy = bot.send_message(message.chat.id, "enemy")
+    enemy = bot.send_message(message.chat.id, "Напиши название команды противника", reply_markup=key_cancel)
     bot.register_next_step_handler(enemy, add_time, bot)
 
 
 def add_time(message, bot):
-    time = bot.send_message(message.chat.id, "time")
+    time = bot.send_message(message.chat.id, "Напиши время матча (формат: YYYY-MM-DD HH:MM)", reply_markup=key_cancel)
     bot.register_next_step_handler(time, add_game, bot, message.text)
 
 
 def add_game(message, bot, enemy):
-    game = bot.send_message(message.chat.id, "game")
+    game = bot.send_message(message.chat.id, "Напиши игру/дисциплину", reply_markup=key_cancel)
     bot.register_next_step_handler(game, add_url, bot, enemy, message.text)
 
 
 def add_url(message, bot, enemy, time):
-    url = bot.send_message(message.chat.id, "url")
+    url = bot.send_message(message.chat.id, "Напиши ссылку на матч", reply_markup=key_cancel)
     bot.register_next_step_handler(url, add, bot, enemy, time, message.text)
 
 
@@ -104,15 +125,16 @@ def auto_remove():
 
 
 def remove_games(message, bot):
-    enemy = bot.send_message(message.chat.id, "enemy")
+    enemy = bot.send_message(message.chat.id, "Введите противника матча для удаления", reply_markup=key_cancel)
     bot.register_next_step_handler(enemy, day, bot)
 
 def day(message, bot):
-    day = bot.send_message(message.chat.id, "day")
+    day = bot.send_message(message.chat.id, "Введите день проведения матча", reply_markup=key_cancel)
     bot.register_next_step_handler(day, remove, bot, message.text)
 
 
 def remove(message, bot, enemy):
+    check = False
     with open('resources/games.csv', 'r', encoding='utf-8') as infile, open('resources/games_edit.csv', 'w+', newline='', encoding='utf-8') as outfile:
         reader = csv.reader(infile)
         writer = csv.writer(outfile)
@@ -124,6 +146,10 @@ def remove(message, bot, enemy):
             date = datetime.datetime.strptime(row[3], "%Y-%m-%d %H:%M")
             if row[1] != enemy and date.day != message.text:
                 writer.writerow(row)
-
+            else:
+                check = True
     os.replace('resources/games_edit.csv', 'resources/games.csv')
-    bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
+    if check:
+        bot.send_message(message.chat.id, "Успешно", reply_markup=keys_admin)
+    else:
+        bot.send_message(message.chat.id, "Матч не найден", reply_markup=keys_admin)
